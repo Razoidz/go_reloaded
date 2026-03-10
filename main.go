@@ -182,7 +182,11 @@ func vowelFix(words []string) []string{
 		if strings.ToLower(words[i]) == "a" && i+1 < len(words){
 			firstcharacter := unicode.ToLower(rune(words[i+1][0]))
 			if isVowel(firstcharacter){
-				words[i] = "an"
+				if words[i] == "A"{
+					words[i] = "An"
+				}else {
+					words[i] = "an"
+				}
 			} 
 		}
 	}
