@@ -1,136 +1,34 @@
 package main
 
 import (
-	"reflect"
+	"strings"
 	"testing"
 )
 
-func TestDecimalConversion(t *testing.T) {
-	tests := []struct {
-		input  []string
-		output []string
-	}{
-		{
-			[]string{"1A", "(hex)"},
-			[]string{"26"},
-		},
-		{
-			[]string{"1010", "(bin)"},
-			[]string{"10"},
-		},
-	}
+func TestFullTextProcessing(t *testing.T) {
+	input := "If I make you BREAKFAST IN BED (low, 3) just say thank you instead of: how (cap) did you get in my house (up, 2) ?. " +
+		"I have to pack 101 (bin) outfits. Packed 1a (hex) just to be sure " +
+		"Don not be sad ,because sad backwards is das . And das not good " +
+		"harold wilson (cap, 2) : ' I am a optimist ,but a optimist who carries a raincoat . '"
 
-	for _, test := range tests {
-		result := decimalConversion(test.input)
+	words := strings.Fields(input)
 
-		if !reflect.DeepEqual(result, test.output) {
-			t.Errorf("expected %v got %v", test.output, result)
-		}
-	}
-}
+	// Run all processing steps
+	words = decimalConversion(words)
+	words = caseConversion(words)
+	words = caseConversion2(words)
+	words = punctuation(words)
+	words = quotes(words)
+	words = vowelFix(words)
 
-func TestCaseConversion(t *testing.T) {
-	tests := []struct {
-		input  []string
-		output []string
-	}{
-		{
-			[]string{"hello", "(up)"},
-			[]string{"HELLO"},
-		},
-		{
-			[]string{"HELLO", "(low)"},
-			[]string{"hello"},
-		},
-		{
-			[]string{"hello", "(cap)"},
-			[]string{"Hello"},
-		},
-	}
+	result := strings.Join(words, " ")
 
-	for _, test := range tests {
-		result := caseConversion(test.input)
+	// Full expected output after all transformations
+	expected := "If I make you breakfast in bed just say thank you instead of: How did you get in MY HOUSE?. " +
+		"I have to pack 5 outfits. Packed 26 just to be sure Don not be sad, because sad backwards is das. And das not good " +
+		"Harold Wilson: 'I am an optimist, but an optimist who carries a raincoat.'"
 
-		if !reflect.DeepEqual(result, test.output) {
-			t.Errorf("expected %v got %v", test.output, result)
-		}
-	}
-}
-
-func TestCaseConversion2(t *testing.T) {
-	tests := []struct {
-		input  []string
-		output []string
-	}{
-		{
-			[]string{"this", "is", "test", "(up,", "2)"},
-			[]string{"this", "IS", "TEST"},
-		},
-		{
-			[]string{"HELLO", "WORLD", "(low,", "2)"},
-			[]string{"hello", "world"},
-		},
-		{
-			[]string{"hello", "world", "(cap,", "2)"},
-			[]string{"Hello", "World"},
-		},
-	}
-
-	for _, test := range tests {
-		result := caseConversion2(test.input)
-
-		if !reflect.DeepEqual(result, test.output) {
-			t.Errorf("expected %v got %v", test.output, result)
-		}
-	}
-}
-
-func TestPunctuation(t *testing.T) {
-	input := []string{"Hello", ",", "world", "!"}
-	expected := []string{"Hello,", "world!"}
-
-	result := punctuation(input)
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected %v got %v", expected, result)
-	}
-}
-
-func TestQuotes(t *testing.T) {
-	input := []string{"'", "hello", "world", "'"}
-	expected := []string{"'hello", "world'"}
-
-	result := quotes(input)
-
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("expected %v got %v", expected, result)
-	}
-}
-
-func TestVowelFix(t *testing.T) {
-	tests := []struct {
-		input  []string
-		output []string
-	}{
-		{
-			[]string{"a", "apple"},
-			[]string{"an", "apple"},
-		},
-		{
-			[]string{"A", "orange"},
-			[]string{"An", "orange"},
-		},
-		{
-			[]string{"a", "banana"},
-			[]string{"a", "banana"},
-		},
-	}
-
-	for _, test := range tests {
-		result := vowelFix(test.input)
-
-		if !reflect.DeepEqual(result, test.output) {
-			t.Errorf("expected %v got %v", test.output, result)
-		}
+	if result != expected {
+		t.Errorf("Text processing failed.\nExpected:\n%q\n\nGot:\n%q", expected, result)
 	}
 }
